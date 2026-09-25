@@ -1,0 +1,213 @@
+<template>
+    <lightning-card title="Cinema Permit Tracker" icon-name="standard:process">
+
+        <div class="slds-p-around_medium">
+
+            <!-- Permit Header -->
+            <div class="slds-grid slds-wrap slds-grid_align-spread slds-m-bottom_medium">
+
+                <div>
+                    <div class="slds-text-title">
+                        PERMIT APPLICATION
+                    </div>
+
+                    <div class="slds-text-heading_medium">
+                        {permitNumber}
+                    </div>
+                </div>
+
+                <lightning-badge
+                    label={displayStatus}>
+                </lightning-badge>
+
+            </div>
+
+            <!-- Permit Details -->
+            <div class="slds-grid slds-wrap slds-gutters">
+
+                <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                    <div class="slds-box slds-theme_default">
+                        <div class="slds-text-title">Permit Type</div>
+                        <div>{permitType}</div>
+                    </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                    <div class="slds-box slds-theme_default">
+                        <div class="slds-text-title">Application Category</div>
+                        <div>{applicationCategory}</div>
+                    </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                    <div class="slds-box slds-theme_default">
+                        <div class="slds-text-title">Cinema</div>
+                        <div>{cinemaName}</div>
+                    </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                    <div class="slds-box slds-theme_default">
+                        <div class="slds-text-title">Applicant</div>
+                        <div>{applicantName}</div>
+                    </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                    <div class="slds-box slds-theme_default">
+                        <div class="slds-text-title">Submission Date</div>
+                        <lightning-formatted-date-time
+                            value={createdDate}
+                            year="numeric"
+                            month="short"
+                            day="2-digit">
+                        </lightning-formatted-date-time>
+                    </div>
+                </div>
+
+                <div class="slds-col slds-size_1-of-3 slds-m-bottom_small">
+                    <div class="slds-box slds-theme_default">
+                        <div class="slds-text-title">Fee</div>
+                        <lightning-formatted-number
+                            value={permitFee}
+                            format-style="currency"
+                            currency-code="INR">
+                        </lightning-formatted-number>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Application Progress -->
+            <div class="slds-m-top_large">
+
+                <h2 class="slds-text-heading_small slds-m-bottom_medium">
+                    Application Progress
+                </h2>
+
+                <lightning-progress-indicator
+                    current-step={currentStatus}
+                    type="path"
+                    variant="base">
+
+                    <lightning-progress-step
+                        label="Submitted"
+                        value="Submitted">
+                    </lightning-progress-step>
+
+                    <lightning-progress-step
+                        label="Review"
+                        value="Review">
+                    </lightning-progress-step>
+
+                    <lightning-progress-step
+                        label="Approved"
+                        value="Approved">
+                    </lightning-progress-step>
+
+                    <lightning-progress-step
+                        label="Issued"
+                        value="Issued">
+                    </lightning-progress-step>
+
+                </lightning-progress-indicator>
+
+            </div>
+
+            <!-- Rejected State -->
+            <template if:true={isRejected}>
+
+                <div class="slds-notify slds-notify_alert slds-theme_error slds-m-top_large">
+                    <h2>
+                        This permit application has been rejected.
+                    </h2>
+                </div>
+
+                <template if:false={showGrievanceForm}>
+                    <div class="slds-m-top_medium">
+                        <lightning-button
+                            label="Raise a Grievance"
+                            variant="brand"
+                            onclick={handleRaiseGrievance}>
+                        </lightning-button>
+                    </div>
+                </template>
+
+                <!-- Grievance Form -->
+                <template if:true={showGrievanceForm}>
+
+                    <div class="slds-m-top_medium">
+
+                        <lightning-record-edit-form
+                            object-api-name="Grievance__c"
+                            onsuccess={handleGrievanceSuccess}>
+
+                            <lightning-messages>
+                            </lightning-messages>
+
+                            <lightning-input-field
+                                field-name="Permit_Application__c"
+                                value={recordId}
+                                disabled>
+                            </lightning-input-field>
+
+                            <lightning-input-field
+                                field-name="Subject__c"
+                                required>
+                            </lightning-input-field>
+
+                            <lightning-input-field
+                                field-name="Description__c"
+                                required>
+                            </lightning-input-field>
+
+                            <div class="slds-m-top_medium">
+
+                                <lightning-button
+                                    variant="brand"
+                                    type="submit"
+                                    label="Submit Grievance">
+                                </lightning-button>
+
+                                <lightning-button
+                                    label="Cancel"
+                                    onclick={handleCancelGrievance}
+                                    class="slds-m-left_small">
+                                </lightning-button>
+
+                            </div>
+
+                        </lightning-record-edit-form>
+
+                    </div>
+
+                </template>
+
+            </template>
+
+            <!-- Supporting Documents -->
+            <div class="slds-m-top_large">
+
+                <h2 class="slds-text-heading_small slds-m-bottom_small">
+                    Supporting Documents
+                </h2>
+
+                <lightning-file-upload
+                    label="Upload Supporting Document"
+                    name="fileUploader"
+                    accept=".pdf,.png,.jpg,.docx"
+                    record-id={recordId}
+                    onuploadfinished={handleUploadFinished}
+                    multiple>
+                </lightning-file-upload>
+
+                <p class="slds-text-body_small slds-m-top_x-small">
+                    Upload additional documents related to this permit.
+                </p>
+
+            </div>
+
+        </div>
+
+    </lightning-card>
+</template>
